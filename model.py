@@ -91,7 +91,8 @@ def predict_sentiment(review, vocab, word_index, max_sequences_length, model):
     line = pad_start_word([line], word_index['<s>'])
     line = pad_sequences(line, maxlen=max_sequences_length, padding='pre')
     # prediction
-    yhat = model.predict_classes(line, verbose=0)
+    # yhat = model.predict_classes(line, verbose=0)
+    yhat = model.predict(line)
     return yhat[0,0]
 
 # load the vocabulary
@@ -110,9 +111,10 @@ tokenizer = Tokenizer()
 # fit the tokenizer on the documents
 tokenizer.fit_on_texts(train_docs)
 
-# define the mapping dictionary for word to id and id to word
+# create the mapping dictionary for word to id and id to word
 word_index = {k:v for k,v in tokenizer.word_index.items()}
 word_index['<s>'] = len(tokenizer.word_index) + 1
+word_index['<PAD>'] = 0
 index_word = {v:k for k,v in word_index.items()}
 
 # define vocabulary size (largest integer value)
