@@ -1,4 +1,6 @@
 # LSTM and CNN for sequence classification in the IMDB dataset
+import gensim
+
 import numpy
 from keras.datasets import imdb
 from keras.models import Sequential
@@ -54,12 +56,17 @@ max_review_length = max([len(i) for i in X_train])
 X_train = pad_sequences(X_train, maxlen=max_review_length, padding='pre')
 X_test = pad_sequences(X_test, maxlen=max_review_length, padding='pre')
 
+# define word2vec embedding layer
+word2vec_model = gensim.models.Word2Vec.load("../../word2vec/wiki.en.200.word2vec")
+embedding_layer = word2vec_model.wv.get_keras_embedding(train_embeddings=False)
+embedding_layer.input_length = max_review_length
+
 # create the LSTM-CNN model
 model = Sequential()
-model.add(Embedding(top_words, 100, input_length=max_review_length))
+model.add(embedding_layer)
 model.add(Conv1D(filters=32, kernel_size=8, activation='relu'))
 model.add(MaxPooling1D(pool_size=2))
-model.add(LSTM(100))
+model.add(LSTM(100, dropout = 0.5, recurrent_dropout= 0.5))
 model.add(Dense(1, activation='sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 print(model.summary())
